@@ -1,0 +1,21 @@
+[package]
+name = "find-me-gfi"
+version = "0.1.0"
+edition = "2021"
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+log = "0.4.17"
+env_logger = "0.10.0"
+dotenv = "0.15.0"
+chrono = "0.4.24"
+ureq = "2.6.2"
+clap = { version = "4.3.0", features = ["derive"] }
