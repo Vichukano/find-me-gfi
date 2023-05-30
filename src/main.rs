@@ -76,9 +76,9 @@ fn parse_response(response: String) -> GitHubIssueResponse {
     serde_json::from_str(response.as_str()).unwrap()
 }
 
-fn get_issues_from_github(token: String, lang: String, label: String) -> GitHubIssueResponse {
+fn get_issues_from_github(token: String, lang: String, label: String, page: i32) -> GitHubIssueResponse {
     //q=windows+label:bug+language:python+state:open&sort=created&order=asc
-    let query = format!("{}label:{}+language:{}+state:open&sort=created&per_page=100", API_PATH, label, lang);
+    let query = format!("{}label:{}+language:{}+state:open&sort=created&per_page=100&page={}", API_PATH, label, lang, page);
     let body: String = ureq::get(query.as_str())
         .set("Accept", "application/vnd.github+json")
         .set("Authorization", format!("Bearer {}", token).as_str())
@@ -95,6 +95,8 @@ struct Args {
     language: String,
     #[arg(short, long)]
     tag: String,
+    #[arg(short, long)]
+    pages: Option<i32>,
 }
 
 fn main() {
@@ -105,12 +107,17 @@ fn main() {
     let args = Args::parse();
     let lang = args.language;
     let label = args.tag;
-    let issue_dtos = get_issues_from_github(
-        token, lang, label,
-    ).items;
-    let issues: Vec<Issue> = issue_dtos.into_iter().map(|i| i.into()).collect();
-    for i in issues.iter() {
-        println!("{}", i);
+    let pages = args.pages.unwrap_or(1);
+    let mut count = 1;
+    for p in 1..=pages {
+        let issue_dtos = get_issues_from_github(
+            token.clone(), lang.clone(), label.clone(), p,
+        ).items;
+        let issues: Vec<Issue> = issue_dtos.into_iter().map(|i| i.into()).collect();
+        for i in issues.iter() {
+            println!("{} {}", count, i);
+            count = count + 1;
+        }
     }
 }
 
